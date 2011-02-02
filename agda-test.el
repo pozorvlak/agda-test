@@ -1,3 +1,5 @@
+(require 'cl)
+
 ;; test fiveness: five is 5;
 ;; test sevenocity: seven is 7;
 
@@ -11,14 +13,24 @@
 
 ;; test negativity: -1 is minus one;
 
-(defun agda2-test-all ()
-  (interactive)
-  (save-excursion
-    (pop-to-buffer (get-buffer-create agda2-error-buffer-name) t)
-    (delete-region (point-min) (point-max)))
+(defun agda2-tests-in-current-buffer ()
   (save-excursion
     (goto-char (point-min))
-    (while (re-search-forward agda2-test-regexp nil t)
-      ;; Now `(match-string n)` for some integer `n` gives you the Nth
-      ;; capturing group from the most recent match of `rx`.
-      (agda2-run-test (match-string 1) (match-string 2) (match-string 3)))))
+    (loop while (re-search-forward agda2-test-regexp nil t)
+	  collect (list (match-string 1) (match-string 2) (match-string 3)))))
+
+(defun agda2-clear-error-buffer ()
+  (save-excursion
+    (pop-to-buffer (get-buffer-create agda2-error-buffer-name) t)
+    (delete-region (point-min) (point-max))))
+
+(defun agda2-test-list (tests)
+  (agda2-clear-error-buffer)
+  (mapcar (lambda (args) (apply 'agda2-run-test args)) tests))
+
+
+(defun agda2-test-all ()
+  (interactive)
+  (agda2-test-list (agda2-tests-in-current-buffer)))
+
+(local-set-key "\C-ct" 'agda2-test-all)
