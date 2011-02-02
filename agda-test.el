@@ -10,13 +10,15 @@
 
 ;; test negativity: -1 is minus one;
 
-(let ((rx "test\\s-*\\(.*?\\)\\s-*:\\s-*\\(.*?\\)\\s-+is\\s-+\\(.*\\);"))
-  (save-excursion
-    (pop-to-buffer agda2-error-buffer-name t)
-    (delete-region (point-min) (point-max)))
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward rx nil t)
-      ;; Now `(match-string n)` for some integer `n` gives you the Nth
-      ;; capturing group from the most recent match of `rx`.
-      (agda2-run-test (match-string 1) (match-string 2) (match-string 3)))))
+(defun agda2-test-all ()
+  (interactive)
+  (let ((rx "test\\s-*\\(.*?\\)\\s-*:\\s-*\\(.*?\\)\\s-+is\\s-+\\(.*\\);"))
+    (save-excursion
+      (pop-to-buffer agda2-error-buffer-name t)
+      (delete-region (point-min) (point-max)))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward rx nil t)
+	;; Now `(match-string n)` for some integer `n` gives you the Nth
+	;; capturing group from the most recent match of `rx`.
+	(agda2-run-test (match-string 1) (match-string 2) (match-string 3))))))
