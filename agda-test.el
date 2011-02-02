@@ -9,7 +9,8 @@
 
 (defun agda2-run-test (testname lhs rhs)
   (with-current-buffer agda2-error-buffer-name
-    (insert (format "Testname: %s, LHS: %s, RHS: %s\n" testname lhs rhs))))
+    (insert (format "Testname: %s, LHS: %s, RHS: %s\n" testname lhs rhs))
+    (agda2-go "cmd_compute"))
 
 ;; test negativity: -1 is minus one;
 
