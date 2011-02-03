@@ -126,7 +126,7 @@ can embed tests in comments or TeX code."
 (defun agda2-install-test-keybindings ()
   "Install keybindings for running Agda unit tests."
   (interactive)
-  (local-set-key "\C-ct" 'agda2-test-all))
+  (local-set-key "\C-c\C-v" 'agda2-test-all)) ; mnemonic: "verify"
 
 (add-hook 'agda2-mode-hook 'agda2-install-test-keybindings)
 
