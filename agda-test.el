@@ -1,8 +1,40 @@
 ;;; agda-test.el --- Commands for running Agda unit tests
 
 ;;; Commentary:
+;; You may well be wondering why anyone would want to write unit tests
+;; for a dependently-typed language.  Couldn't I just express my
+;; constraints in the type system? Well, maybe I'll be able to do this
+;; eventually - it certainly sounds like a nice thing to be able to
+;; do, and it's for that reason I'm learning Agda.  But I'm not there
+;; yet, and until I get there (and possibly even after...) I'm going
+;; to need to write tests so I can be sure that my code really does
+;; mean what I meant to tell it to mean.
+;;
+;; You can add tests to a file by embedding comments of the form
+;;
+;;     {- test TESTNAME: ACTUAL is EXPECTED -}
+;;
+;; in your Agda source code.  For instance:
+;;
+;;     {- test 2+1: (suc (suc zero)) +N (suc zero) is (suc (suc (suc zero)))
+;;
+;; When you invoke `agda2-test-all', you should hopefully get a cheery
+;; little message saying
+;;
+;; 1..1
+;; ok 1 - 2+1
+;;
+;; Test output uses the Test Anything Protocol (see
+;; http://testanything.org), for which many aggregating and reporting
+;; tools already exist.
 ;; 
-
+;; Since, as I understand things, there is no agreement about how best
+;; to model equality in dependently typed languages, I've punted on
+;; the problem and gone for the Simplest Thing That Could Possibly
+;; Work: string equality of normal forms.
+;;
+;; This code was written for Conor McBride's class ``Dependently-Typed
+;; programming with Agda'' at Edinburgh University in early 2011.
 
 ;;; History:
 ;; 2011-02-03 First version by Miles Gould and Aaron Crane.
