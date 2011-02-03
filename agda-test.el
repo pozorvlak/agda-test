@@ -68,28 +68,32 @@ information* buffer."
   (with-current-buffer agda2-information-buffer-name
     (buffer-substring-no-properties (point-min) (point-max))))
 
-(defun agda2-run-test (testname lhs rhs)
+(defun agda2-run-test (testname lhs rhs &optional testnum)
   "Run a single Agda unit test.
 The name of the test for reporting purposes is TESTNAME.  The
 test succeeds if the Agda expressions LHS and RHS have the same
-normal form (determined by string equality).  Output will be
-placed in the buffer `agda2-test-buffer-name'."
+normal form (determined by string equality).  If TESTNUM is
+given, the test is treated as the TESTNUM'th test in the current
+run, otherwise it is treated as the first.  Output will be placed
+in the buffer `agda2-test-buffer-name'."
   (let ((lhsval (agda2-normalise-string lhs))
-	(rhsval (agda2-normalise-string rhs)))
+	(rhsval (agda2-normalise-string rhs))
+	(test-number (if testnum testnum 1)))
     (with-current-buffer agda2-test-buffer-name
-      (insert (format "Testname: %s, LHS: %s, RHS: %s\n" testname lhs rhs))
       (insert
        (if (string-equal lhsval rhsval)
-	   (format "Success! LHS=%s, RHS=%s\n" lhsval rhsval)
-	 (format "Failure: LHS=%s, RHS=%s\n" lhsval rhsval))))))
+	   (format "ok %d - %s\n" test-number testname )
+	 (format "not ok %d - %s\n    got %s\n    expected %s\n"
+		 test-number testname lhsval rhsval))))))
 
 (defun agda2-tests-in-current-buffer ()
   "Find all the Agda unit tests in the current buffer.
-Returns a list of (TESTNAME ACTUAL EXPECTED) triples."
+Returns a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
   (save-excursion
     (goto-char (point-min))
     (loop while (re-search-forward agda2-test-regexp nil t)
-	  collect (list (match-string 1) (match-string 2) (match-string 3)))))
+	  for num from 1
+	  collect (list (match-string 1) (match-string 2) (match-string 3) num))))
 
 (defun agda2-clear-test-buffer ()
   "Clear the Agda test result buffer.
@@ -101,7 +105,7 @@ The name of the test result buffer is given by `agda2-test-buffer-name'."
 (defun agda2-test-list (tests)
   "Run a list of Agda unit tests.
 The list of tests is passed as the argument TESTS in the form of
-a list of (TESTNAME ACTUAL EXPECTED) triples."
+a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
   (agda2-clear-test-buffer)
   (mapcar (lambda (args) (apply 'agda2-run-test args)) tests))
 
