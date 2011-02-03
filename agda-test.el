@@ -79,15 +79,15 @@ normal form (determined by string equality).  If TESTNUM is
 given, the test is treated as the TESTNUM'th test in the current
 run, otherwise it is treated as the first.  Output will be placed
 in the buffer `agda2-test-buffer-name'."
+  (setq testnum (or testnum 1))
   (let ((lhsval (agda2-normalise-string lhs))
-        (rhsval (agda2-normalise-string rhs))
-        (test-number (if testnum testnum 1)))
+        (rhsval (agda2-normalise-string rhs)))
     (with-current-buffer agda2-test-buffer-name
       (insert
        (if (string-equal lhsval rhsval)
-           (format "ok %d - %s\n" test-number testname)
+           (format "ok %d - %s\n" testnum testname)
          (format "not ok %d - %s\n    got %s\n    expected %s\n"
-                 test-number testname lhsval rhsval))))))
+                 testnum testname lhsval rhsval))))))
 
 (defun agda2-tests-in-current-buffer ()
   "Find all the Agda unit tests in the current buffer.
