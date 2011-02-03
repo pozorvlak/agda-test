@@ -49,9 +49,12 @@
   (agda2-clear-error-buffer)
   (mapcar (lambda (args) (apply 'agda2-run-test args)) tests))
 
-
 (defun agda2-test-all ()
   (interactive)
   (agda2-test-list (agda2-tests-in-current-buffer)))
 
-(local-set-key "\C-ct" 'agda2-test-all)
+(defun agda2-install-test-keybindings ()
+  (interactive)
+  (local-set-key "\C-ct" 'agda2-test-all))
+
+(add-hook 'agda2-mode-hook 'agda2-install-test-keybindings)
