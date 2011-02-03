@@ -1,6 +1,6 @@
 (require 'cl)
 
-(defvar agda2-error-buffer-name "*Agda errors*")
+(defvar agda2-error-buffer-name "*Agda test results*")
 (defvar agda2-information-buffer-name "*Agda information*")
 (defvar agda2-test-regexp
   "test\\s-*\\(.*?\\)\\s-*:\\s-*\\(.*?\\)\\s-+is\\s-+\\(.*\\);")
