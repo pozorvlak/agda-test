@@ -10,7 +10,7 @@
 ;; to need to write tests so I can be sure that my code really does
 ;; mean what I meant to tell it to mean.
 ;;
-;; You can add tests to a file by embedding comments of the form
+;; You can add test cases to a file by embedding comments of the form
 ;;
 ;;     {- test TESTNAME: ACTUAL is EXPECTED -}
 ;;
@@ -51,7 +51,7 @@
 
 (defvar agda2-test-regexp
   "test\\s-*\\(.*?\\)\\s-*:\\s-*\\(.*?\\)\\s-+is\\s-+\\(.*\\);"
-  "Regexp to find test expressions in Agda files.")
+  "Regexp to find test cases in Agda files.")
 
 (defun agda2-normalise-string (expr)
   "Return the normal form of the Agda expression EXPR.
@@ -62,10 +62,10 @@ code to insert the normalised value into a buffer.  This code is
 passed back to `agda2-compute-normalised', which then executes
 it.  Hence, the easiest way to get at the normalised value of an
 Agda expression is to call `agda2-compute-normalised' and then
-inspect the *Agda information* buffer.  [It may look like you need
-to inspect the *Normal Form* buffer, but your minibuffer is full
-of lies.  Trust me on this.]  An unfortunate consequence is that
-calling this function will blow away anything in your *Agda
+inspect the *Agda information* buffer.  [It may look like you
+need to inspect the *Normal Form* buffer, but your modeline is
+full of lies.  Trust me on this.]  An unfortunate consequence is
+that calling this function will blow away anything in your *Agda
 information* buffer."
   (agda2-compute-normalised-toplevel (substring-no-properties expr))
   (with-current-buffer agda2-information-buffer-name
@@ -114,12 +114,12 @@ a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
 
 (defun agda2-test-all ()
   "Run all the Agda unit tests in the current buffer.
-Tests are strings of the form `test TESTNAME: EXPECTED is
-ACTUAL;', where TESTNAME is the name of the test (used for
-reporting), and EXPECTED and ACTUAL are Agda expressions which
-are expected to have the same normal form (determined by string
-equality).  All three of TESTNAME, EXPECTED and ACTUAL may
-include spaces.  You can embed tests in comments or TeX code."
+Tests are strings of the form `test TESTNAME: EXPECTED is ACTUAL;',
+where TESTNAME is the name of the test (used for reporting), and
+EXPECTED and ACTUAL are Agda expressions which are expected to
+have the same normal form (determined by string equality).  All
+three of TESTNAME, EXPECTED and ACTUAL may include spaces.  You
+can embed tests in comments or TeX code."
   (interactive)
   (agda2-test-list (agda2-tests-in-current-buffer)))
 
