@@ -1,8 +1,5 @@
 (require 'cl)
 
-;; test fiveness: five is 5;
-;; test sevenocity: seven is 7;
-
 (defvar agda2-error-buffer-name "*Agda errors*")
 (defvar agda2-information-buffer-name "*Agda information*")
 (defvar agda2-test-regexp
@@ -31,8 +28,6 @@
        (if (string-equal lhsval rhsval)
 	   (format "Success! LHS=%s, RHS=%s\n" lhsval rhsval)
 	 (format "Failure: LHS=%s, RHS=%s\n" lhsval rhsval))))))
-
-;; test negativity: -1 is minus one;
 
 (defun agda2-tests-in-current-buffer ()
   (save-excursion
