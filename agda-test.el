@@ -27,7 +27,7 @@
 ;; Test output uses the Test Anything Protocol (see
 ;; http://testanything.org), for which many aggregating and reporting
 ;; tools already exist.
-;; 
+;;
 ;; Since, as I understand things, there is no agreement about how best
 ;; to model equality in dependently typed languages, I've punted on
 ;; the problem and gone for the Simplest Thing That Could Possibly
@@ -42,10 +42,13 @@
 (require 'cl) ;; agda2-mode does anyway, because haskell-indent does anyway...
 
 ;;; Code:
+
 (defvar agda2-test-buffer-name "*Agda test results*"
   "The name of the buffer that contains the results of Agda unit tests.")
+
 (defvar agda2-information-buffer-name "*Agda information*"
   "The True Name of the buffer to which the Agda interpreter sends its output.")
+
 (defvar agda2-test-regexp
   "test\\s-*\\(.*?\\)\\s-*:\\s-*\\(.*?\\)\\s-+is\\s-+\\(.*\\);"
   "Regexp to find test expressions in Agda files.")
@@ -77,14 +80,14 @@ given, the test is treated as the TESTNUM'th test in the current
 run, otherwise it is treated as the first.  Output will be placed
 in the buffer `agda2-test-buffer-name'."
   (let ((lhsval (agda2-normalise-string lhs))
-	(rhsval (agda2-normalise-string rhs))
-	(test-number (if testnum testnum 1)))
+        (rhsval (agda2-normalise-string rhs))
+        (test-number (if testnum testnum 1)))
     (with-current-buffer agda2-test-buffer-name
       (insert
        (if (string-equal lhsval rhsval)
-	   (format "ok %d - %s\n" test-number testname )
-	 (format "not ok %d - %s\n    got %s\n    expected %s\n"
-		 test-number testname lhsval rhsval))))))
+           (format "ok %d - %s\n" test-number testname)
+         (format "not ok %d - %s\n    got %s\n    expected %s\n"
+                 test-number testname lhsval rhsval))))))
 
 (defun agda2-tests-in-current-buffer ()
   "Find all the Agda unit tests in the current buffer.
@@ -92,8 +95,8 @@ Returns a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
   (save-excursion
     (goto-char (point-min))
     (loop while (re-search-forward agda2-test-regexp nil t)
-	  for num from 1
-	  collect (list (match-string 1) (match-string 2) (match-string 3) num))))
+          for num from 1
+          collect (list (match-string 1) (match-string 2) (match-string 3) num))))
 
 (defun agda2-clear-test-buffer ()
   "Clear the Agda test result buffer.
