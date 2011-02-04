@@ -12,17 +12,17 @@
 ;;
 ;; You can add test cases to a file by embedding comments of the form
 ;;
-;;     {- test TESTNAME: ACTUAL is EXPECTED -}
+;;     {- test TESTNAME: ACTUAL is EXPECTED; -}
 ;;
 ;; in your Agda source code.  For instance:
 ;;
-;;     {- test 2+1: (suc (suc zero)) +N (suc zero) is (suc (suc (suc zero)))
+;;     {- test 1+1: (suc zero) +N (suc zero) is (suc (suc zero)); -}
 ;;
 ;; When you invoke `agda2-test-run', you should hopefully get a cheery
 ;; little message saying
 ;;
 ;; 1..1
-;; ok 1 - 2+1
+;; ok 1 - 1+1
 ;;
 ;; Test output uses the Test Anything Protocol (see
 ;; http://testanything.org), for which many aggregating and reporting
