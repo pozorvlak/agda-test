@@ -71,15 +71,13 @@ information* buffer."
   (with-current-buffer agda2-test-information-buffer-name
     (buffer-substring-no-properties (point-min) (point-max))))
 
-(defun agda2-test-run-case (testname lhs rhs &optional testnum)
+(defun agda2-test-run-case (testnum testname lhs rhs)
   "Run a single Agda unit test.
 The name of the test for reporting purposes is TESTNAME.  The
 test succeeds if the Agda expressions LHS and RHS have the same
-normal form (determined by string equality).  If TESTNUM is
-given, the test is treated as the TESTNUM'th test in the current
-run, otherwise it is treated as the first.  Output will be placed
+normal form (determined by string equality).  The test is treated
+as the TESTNUM'th test in the current run.  Output will be placed
 in the buffer `agda2-test-buffer-name'."
-  (setq testnum (or testnum 1))
   (let ((lhsval (agda2-test-normalise-string lhs))
         (rhsval (agda2-test-normalise-string rhs)))
     (with-current-buffer agda2-test-buffer-name
@@ -89,22 +87,21 @@ in the buffer `agda2-test-buffer-name'."
          (format "not ok %d - %s\n    got %s\n    expected %s\n"
                  testnum testname lhsval rhsval))))))
 
-(defun agda2-test-find-next-case (num &optional limit)
+(defun agda2-test-find-next-case (&optional limit)
   "Find the next Agda unit test in the current buffer.
 Returns nil if none is found.
 The optional second argument is a buffer position; if supplied,
 the case must not extend beyond that position.
 On exit, the regexp match data reflect the case found."
   (and (re-search-forward agda2-test-regexp limit t)
-       (list (match-string 1) (match-string 2) (match-string 3) num)))
+       (list (match-string 1) (match-string 2) (match-string 3))))
 
 (defun agda2-test-find-all-in-current-buffer ()
   "Find all the Agda unit tests in the current buffer.
-Returns a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
+Returns a list of (TESTNAME ACTUAL EXPECTED) triples."
   (save-excursion
     (goto-char (point-min))
-    (loop for num from 1
-          for case = (agda2-test-find-next-case num)
+    (loop for case = (agda2-test-find-next-case)
           while case
           collect case)))
 
@@ -114,16 +111,14 @@ Uses the last case that ends on the same line as point, or the
 next in the buffer otherwise; or throws an error if no suitable
 case is found."
   (let ((original-eol (point-at-eol))
-        (num 1)
         case)
     (save-excursion
       (goto-char (point-min))
-      (loop for c = (agda2-test-find-next-case num original-eol)
+      (loop for c = (agda2-test-find-next-case original-eol)
             while c
-            if (= (point-at-eol) original-eol) do (setq case c)
-            do (incf num))
+            if (= (point-at-eol) original-eol) do (setq case c))
       (list (or case
-                (agda2-test-find-next-case num)
+                (agda2-test-find-next-case)
                 (error "No test case found near point"))))))
 
 (defun agda2-test-clear-buffer ()
@@ -136,9 +131,15 @@ The name of the test result buffer is given by `agda2-test-buffer-name'."
 (defun agda2-test-list (tests)
   "Run a list of Agda unit tests.
 The list of tests is passed as the argument TESTS in the form of
-a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
+a list of (TESTNAME ACTUAL EXPECTED) triples."
   (agda2-test-clear-buffer)
-  (mapcar (lambda (case) (apply 'agda2-test-run-case case)) tests))
+  (or tests (error "No tests to run"))
+  (with-current-buffer agda2-test-buffer-name
+    (let ((len (length tests)))
+      (insert (format "%d..%d\n" len len))))
+  (loop for num from 1
+        for case in tests
+        do (apply 'agda2-test-run-case num case)))
 
 (defun agda2-test-run (&optional all)
   "Run one or all Agda unit tests in the current buffer.
