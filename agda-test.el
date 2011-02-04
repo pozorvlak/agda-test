@@ -18,7 +18,7 @@
 ;;
 ;;     {- test 2+1: (suc (suc zero)) +N (suc zero) is (suc (suc (suc zero)))
 ;;
-;; When you invoke `agda2-test-all', you should hopefully get a cheery
+;; When you invoke `agda2-test-run', you should hopefully get a cheery
 ;; little message saying
 ;;
 ;; 1..1
@@ -46,14 +46,14 @@
 (defvar agda2-test-buffer-name "*Agda test results*"
   "The name of the buffer that contains the results of Agda unit tests.")
 
-(defvar agda2-information-buffer-name "*Agda information*"
+(defvar agda2-test-information-buffer-name "*Agda information*"
   "The True Name of the buffer to which the Agda interpreter sends its output.")
 
 (defvar agda2-test-regexp
   "\\_<test\\s-+\\(.*?\\)\\s-*:\\s-*\\(.*?\\)\\s-+is\\s-+\\(.*\\)\\s-*;"
   "Regexp to find test cases in Agda files.")
 
-(defun agda2-normalise-string (expr)
+(defun agda2-test-normalise-string (expr)
   "Return the normal form of the Agda expression EXPR.
 
 The authors of `agda2-mode', in their infinite mercy and wisdom,
@@ -68,10 +68,10 @@ full of lies.  Trust me on this.]  An unfortunate consequence is
 that calling this function will blow away anything in your *Agda
 information* buffer."
   (agda2-compute-normalised-toplevel (substring-no-properties expr))
-  (with-current-buffer agda2-information-buffer-name
+  (with-current-buffer agda2-test-information-buffer-name
     (buffer-substring-no-properties (point-min) (point-max))))
 
-(defun agda2-run-test (testname lhs rhs &optional testnum)
+(defun agda2-test-run-case (testname lhs rhs &optional testnum)
   "Run a single Agda unit test.
 The name of the test for reporting purposes is TESTNAME.  The
 test succeeds if the Agda expressions LHS and RHS have the same
@@ -80,8 +80,8 @@ given, the test is treated as the TESTNUM'th test in the current
 run, otherwise it is treated as the first.  Output will be placed
 in the buffer `agda2-test-buffer-name'."
   (setq testnum (or testnum 1))
-  (let ((lhsval (agda2-normalise-string lhs))
-        (rhsval (agda2-normalise-string rhs)))
+  (let ((lhsval (agda2-test-normalise-string lhs))
+        (rhsval (agda2-test-normalise-string rhs)))
     (with-current-buffer agda2-test-buffer-name
       (insert
        (if (string-equal lhsval rhsval)
@@ -89,7 +89,7 @@ in the buffer `agda2-test-buffer-name'."
          (format "not ok %d - %s\n    got %s\n    expected %s\n"
                  testnum testname lhsval rhsval))))))
 
-(defun agda2-tests-in-current-buffer ()
+(defun agda2-test-find-all-in-current-buffer ()
   "Find all the Agda unit tests in the current buffer.
 Returns a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
   (save-excursion
@@ -98,7 +98,7 @@ Returns a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
           for num from 1
           collect (list (match-string 1) (match-string 2) (match-string 3) num))))
 
-(defun agda2-clear-test-buffer ()
+(defun agda2-test-clear-buffer ()
   "Clear the Agda test result buffer.
 The name of the test result buffer is given by `agda2-test-buffer-name'."
   (save-excursion
@@ -109,10 +109,10 @@ The name of the test result buffer is given by `agda2-test-buffer-name'."
   "Run a list of Agda unit tests.
 The list of tests is passed as the argument TESTS in the form of
 a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
-  (agda2-clear-test-buffer)
-  (mapcar (lambda (args) (apply 'agda2-run-test args)) tests))
+  (agda2-test-clear-buffer)
+  (mapcar (lambda (case) (apply 'agda2-test-run-case case)) tests))
 
-(defun agda2-test-all ()
+(defun agda2-test-run ()
   "Run all the Agda unit tests in the current buffer.
 Tests are strings of the form `test TESTNAME: EXPECTED is ACTUAL;',
 where TESTNAME is the name of the test (used for reporting), and
@@ -121,14 +121,14 @@ have the same normal form (determined by string equality).  All
 three of TESTNAME, EXPECTED and ACTUAL may include spaces.  You
 can embed tests in comments or TeX code."
   (interactive)
-  (agda2-test-list (agda2-tests-in-current-buffer)))
+  (agda2-test-list (agda2-test-find-all-in-current-buffer)))
 
-(defun agda2-install-test-keybindings ()
+(defun agda2-test-install-keybindings ()
   "Install keybindings for running Agda unit tests."
   (interactive)
-  (local-set-key "\C-c\C-v" 'agda2-test-all)) ; mnemonic: "verify"
+  (local-set-key "\C-c\C-v" 'agda2-test-run)) ; mnemonic: "verify"
 
-(add-hook 'agda2-mode-hook 'agda2-install-test-keybindings)
+(add-hook 'agda2-mode-hook 'agda2-test-install-keybindings)
 
 (provide 'agda-test)
 
