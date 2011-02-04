@@ -89,14 +89,42 @@ in the buffer `agda2-test-buffer-name'."
          (format "not ok %d - %s\n    got %s\n    expected %s\n"
                  testnum testname lhsval rhsval))))))
 
+(defun agda2-test-find-next-case (num &optional limit)
+  "Find the next Agda unit test in the current buffer.
+Returns nil if none is found.
+The optional second argument is a buffer position; if supplied,
+the case must not extend beyond that position.
+On exit, the regexp match data reflect the case found."
+  (and (re-search-forward agda2-test-regexp limit t)
+       (list (match-string 1) (match-string 2) (match-string 3) num)))
+
 (defun agda2-test-find-all-in-current-buffer ()
   "Find all the Agda unit tests in the current buffer.
 Returns a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
   (save-excursion
     (goto-char (point-min))
-    (loop while (re-search-forward agda2-test-regexp nil t)
-          for num from 1
-          collect (list (match-string 1) (match-string 2) (match-string 3) num))))
+    (loop for num from 1
+          for case = (agda2-test-find-next-case num)
+          while case
+          collect case)))
+
+(defun agda2-test-find-near-point ()
+  "Find a test case near point.
+Uses the last case that ends on the same line as point, or the
+next in the buffer otherwise; or throws an error if no suitable
+case is found."
+  (let ((original-eol (point-at-eol))
+        (num 1)
+        case)
+    (save-excursion
+      (goto-char (point-min))
+      (loop for c = (agda2-test-find-next-case num original-eol)
+            while c
+            if (= (point-at-eol) original-eol) do (setq case c)
+            do (incf num))
+      (list (or case
+                (agda2-test-find-next-case num)
+                (error "No test case found near point"))))))
 
 (defun agda2-test-clear-buffer ()
   "Clear the Agda test result buffer.
@@ -112,16 +140,22 @@ a list of (TESTNAME ACTUAL EXPECTED TESTNUM) quads."
   (agda2-test-clear-buffer)
   (mapcar (lambda (case) (apply 'agda2-test-run-case case)) tests))
 
-(defun agda2-test-run ()
-  "Run all the Agda unit tests in the current buffer.
+(defun agda2-test-run (&optional all)
+  "Run one or all Agda unit tests in the current buffer.
+By default, runs the last test which ends on the same line as
+point, or the next test in the buffer if there is none, or throws
+an error if no more tests are found.  With a prefix argument,
+runs all tests found in the current buffer.
+
 Tests are strings of the form `test TESTNAME: EXPECTED is ACTUAL;',
 where TESTNAME is the name of the test (used for reporting), and
 EXPECTED and ACTUAL are Agda expressions which are expected to
 have the same normal form (determined by string equality).  All
 three of TESTNAME, EXPECTED and ACTUAL may include spaces.  You
 can embed tests in comments or TeX code."
-  (interactive)
-  (agda2-test-list (agda2-test-find-all-in-current-buffer)))
+  (interactive "P")
+  (agda2-test-list (if all (agda2-test-find-all-in-current-buffer)
+                     (agda2-test-find-near-point))))
 
 (defun agda2-test-install-keybindings ()
   "Install keybindings for running Agda unit tests."
