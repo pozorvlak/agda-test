@@ -119,12 +119,12 @@ On exit, the regexp match data reflect the case found."
        (list (match-string 1) (match-string 2) (match-string 3)
              (match-beginning 0))))
 
-(defun agda2-test-find-all-in-current-buffer ()
+(defun agda2-test-find-region (start end)
   "Find all the Agda unit tests in the current buffer.
 Returns a list of (TESTNAME ACTUAL EXPECTED) triples."
   (save-excursion
-    (goto-char (point-min))
-    (loop for case = (agda2-test-find-next-case)
+    (goto-char start)
+    (loop for case = (agda2-test-find-next-case end)
           while case
           collect case)))
 
@@ -177,7 +177,7 @@ have the same normal form (determined by string equality).  All
 three of TESTNAME, EXPECTED and ACTUAL may include spaces.  You
 can embed tests in comments or TeX code."
   (interactive "P")
-  (agda2-test-list (if all (agda2-test-find-all-in-current-buffer)
+  (agda2-test-list (if all (agda2-test-find-region (point-min) (point-max))
                      (agda2-test-find-near-point))))
 
 (defun agda2-test-install-keybindings ()
