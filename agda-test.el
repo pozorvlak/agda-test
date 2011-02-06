@@ -103,7 +103,7 @@ in the buffer `agda2-test-buffer-name'."
           (insert-text-button
            label
            'action 'agda2-test-tap-button-invoke
-           'face 'default
+           'face (if ok 'default 'font-lock-warning-face)
            'follow-link t
            'help-echo "RET or click to jump to this test's source"
            'agda2-test-source (cons pos buffer)))
