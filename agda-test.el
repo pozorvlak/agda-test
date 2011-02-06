@@ -40,6 +40,7 @@
 ;; 2011-02-03 First version by Miles Gould and Aaron Crane.
 
 (require 'cl) ;; agda2-mode does anyway, because haskell-indent does anyway...
+(require 'button)
 
 ;;; Code:
 
@@ -71,7 +72,17 @@ information* buffer."
   (with-current-buffer agda2-test-information-buffer-name
     (buffer-substring-no-properties (point-min) (point-max))))
 
-(defun agda2-test-run-case (testnum testname lhs rhs)
+(defun agda2-test-tap-button-invoke (button)
+  "Jump from a test case's TAP output to its source"
+  (let ((source (button-get button 'agda2-test-source)))
+    (with-current-buffer (get-buffer-create "frooble")
+      (insert (format "source: %s\n" source))))
+  (let ((source (or (button-get button 'agda2-test-source)
+                    (error "This test's source is unknown"))))
+    (switch-to-buffer (cdr source))
+    (goto-char (car source))))
+
+(defun agda2-test-run-case (testnum testname lhs rhs &optional pos)
   "Run a single Agda unit test.
 The name of the test for reporting purposes is TESTNAME.  The
 test succeeds if the Agda expressions LHS and RHS have the same
@@ -79,13 +90,24 @@ normal form (determined by string equality).  The test is treated
 as the TESTNUM'th test in the current run.  Output will be placed
 in the buffer `agda2-test-buffer-name'."
   (let ((lhsval (agda2-test-normalise-string lhs))
-        (rhsval (agda2-test-normalise-string rhs)))
+        (rhsval (agda2-test-normalise-string rhs))
+        (buffer (current-buffer)))
     (with-current-buffer agda2-test-buffer-name
-      (insert
-       (if (string-equal lhsval rhsval)
-           (format "ok %d - %s\n" testnum testname)
-         (format "not ok %d - %s\n    got %s\n    expected %s\n"
-                 testnum testname lhsval rhsval))))))
+      (let* ((ok (string-equal lhsval rhsval))
+             (label (concat (if ok "" "not ")
+                            (format "ok %d - %s" testnum testname)))
+             (tail (if ok "\n"
+                     (format "\n    got %s\n    expected %s\n" lhsval rhsval))))
+        (if (null pos)
+            (insert label)
+          (insert-text-button
+           label
+           'action 'agda2-test-tap-button-invoke
+           'face 'default
+           'follow-link t
+           'help-echo "RET or click to jump to this test's source"
+           'agda2-test-source (cons pos buffer)))
+        (insert tail)))))
 
 (defun agda2-test-find-next-case (&optional limit)
   "Find the next Agda unit test in the current buffer.
@@ -94,7 +116,8 @@ The optional second argument is a buffer position; if supplied,
 the case must not extend beyond that position.
 On exit, the regexp match data reflect the case found."
   (and (re-search-forward agda2-test-regexp limit t)
-       (list (match-string 1) (match-string 2) (match-string 3))))
+       (list (match-string 1) (match-string 2) (match-string 3)
+             (match-beginning 0))))
 
 (defun agda2-test-find-all-in-current-buffer ()
   "Find all the Agda unit tests in the current buffer.
