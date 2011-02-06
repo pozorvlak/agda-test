@@ -158,8 +158,7 @@ a list of (TESTNAME ACTUAL EXPECTED) triples."
   (agda2-test-clear-buffer)
   (or tests (error "No tests to run"))
   (with-current-buffer agda2-test-buffer-name
-    (let ((len (length tests)))
-      (insert (format "1..%d\n" len))))
+    (insert (format "1..%d\n" (length tests))))
   (loop for num from 1
         for case in tests
         do (apply 'agda2-test-run-case num case)))
