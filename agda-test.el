@@ -51,7 +51,7 @@
   "The True Name of the buffer to which the Agda interpreter sends its output.")
 
 (defvar agda2-test-regexp
-  "\\_<test\\s-+\\(.*?\\)\\s-*:\\s-*\\(.*?\\)\\s-+is\\s-+\\(.*\\)\\s-*;"
+  "\\_<test\\s-+\\(.*?\\)\\s-*:\\s-*\\(.*?\\)\\s-+is\\s-+\\(.*?\\)\\s-*;"
   "Regexp to find test cases in Agda files.")
 
 (defun agda2-test-normalise-string (expr)
