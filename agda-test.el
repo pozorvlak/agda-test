@@ -184,10 +184,17 @@ See `agda2-test-run-all' for documentation of how to specify tests."
   (interactive "P")
   (agda2-test-prove (agda2-test-find-near-point)))
 
+(defun agda2-test-run-region (start end)
+  "Run all the Agda unit tests in the current region.
+See `agda2-test-run-all' for documentation of how to specify tests."
+  (interactive "r")
+  (agda2-test-prove (agda2-test-find-region start end)))
+
 (defun agda2-test-install-keybindings ()
   "Install keybindings for running Agda unit tests."
   (interactive)
   (local-set-key "\C-c\C-v\C-v" 'agda2-test-run-one) ; mnemonic: "verify"
+  (local-set-key "\C-c\C-v\C-r" 'agda2-test-run-region)
   (local-set-key "\C-c\C-v\C-a" 'agda2-test-run-all))
 
 (add-hook 'agda2-mode-hook 'agda2-test-install-keybindings)
