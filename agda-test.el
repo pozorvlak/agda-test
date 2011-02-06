@@ -151,7 +151,7 @@ The name of the test result buffer is given by `agda2-test-buffer-name'."
     (pop-to-buffer (get-buffer-create agda2-test-buffer-name) t)
     (delete-region (point-min) (point-max))))
 
-(defun agda2-test-list (tests)
+(defun agda2-test-prove (tests)
   "Run a list of Agda unit tests.
 The list of tests is passed as the argument TESTS in the form of
 a list of (TESTNAME ACTUAL EXPECTED) triples."
@@ -163,27 +163,32 @@ a list of (TESTNAME ACTUAL EXPECTED) triples."
         for case in tests
         do (apply 'agda2-test-run-case num case)))
 
-(defun agda2-test-run (&optional all)
-  "Run one or all Agda unit tests in the current buffer.
-By default, runs the last test which ends on the same line as
-point, or the next test in the buffer if there is none, or throws
-an error if no more tests are found.  With a prefix argument,
-runs all tests found in the current buffer.
-
+(defun agda2-test-run-all ()
+  "Run all Agda unit tests in the current buffer.
 Tests are strings of the form `test TESTNAME: EXPECTED is ACTUAL;',
 where TESTNAME is the name of the test (used for reporting), and
 EXPECTED and ACTUAL are Agda expressions which are expected to
 have the same normal form (determined by string equality).  All
 three of TESTNAME, EXPECTED and ACTUAL may include spaces.  You
 can embed tests in comments or TeX code."
+  (interactive)
+  (agda2-test-prove (agda2-test-find-region (point-min) (point-max))))
+
+(defun agda2-test-run-one ()
+  "Run an Agda unit test that's nearby in the current buffer.
+It chooses the last test which ends on the same line as point, or
+the next test in the buffer if there is none, or throws an error
+otherwise.
+
+See `agda2-test-run-all' for documentation of how to specify tests."
   (interactive "P")
-  (agda2-test-list (if all (agda2-test-find-region (point-min) (point-max))
-                     (agda2-test-find-near-point))))
+  (agda2-test-prove (agda2-test-find-near-point)))
 
 (defun agda2-test-install-keybindings ()
   "Install keybindings for running Agda unit tests."
   (interactive)
-  (local-set-key "\C-c\C-v" 'agda2-test-run)) ; mnemonic: "verify"
+  (local-set-key "\C-c\C-v\C-v" 'agda2-test-run-one) ; mnemonic: "verify"
+  (local-set-key "\C-c\C-v\C-a" 'agda2-test-run-all))
 
 (add-hook 'agda2-mode-hook 'agda2-test-install-keybindings)
 
