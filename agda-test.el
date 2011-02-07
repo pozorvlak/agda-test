@@ -182,7 +182,7 @@ the next test in the buffer if there is none, or throws an error
 otherwise.
 
 See `agda2-test-run-all' for documentation of how to specify tests."
-  (interactive "P")
+  (interactive)
   (agda2-test-prove (agda2-test-find-near-point)))
 
 (defun agda2-test-run-region (start end)
